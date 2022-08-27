@@ -9,6 +9,7 @@ from sklearn.metrics import average_precision_score
 from utils.km import run_kuhn_munkres
 from utils.utils import write_json, write_text
 
+
 def _compute_iou(a, b):
     x1 = max(a[0], b[0])
     y1 = max(a[1], b[1])
@@ -16,12 +17,30 @@ def _compute_iou(a, b):
     y2 = min(a[3], b[3])
     inter = max(0, x2 - x1) * max(0, y2 - y1)
     union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
-    return inter * 1.0 / union
+    iou = inter * 1.0 / union
+    return iou
+
+
+def _compute_giou(a, b):
+    x1 = max(a[0], b[0])
+    y1 = max(a[1], b[1])
+    x2 = min(a[2], b[2])
+    y2 = min(a[3], b[3])
+    inter = max(0, x2 - x1) * max(0, y2 - y1)
+    union = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - inter
+    x1_c = min(b[0], a[0])
+    x2_c = max(b[2], a[2])
+    y1_c = min(b[1], a[1])
+    y2_c = max(b[3], a[3])
+    ac = (x2_c - x1_c) * (y2_c - y1_c)
+    iou = inter * 1.0 / union
+    giou = iou - ((ac - union) / ac)
+    return giou
 
 
 def eval_detection(
-    gallery_dataset, gallery_dets, det_thresh=0.5, iou_thresh=0.5, labeled_only=False, 
-    outsys_dir=None
+        gallery_dataset, gallery_dets, det_thresh=0.5, iou_thresh=0.5, labeled_only=False,
+        outsys_dir=None
 ):
     """
     gallery_det (list of ndarray): n_det x [x1, y1, x2, y2, score] per image
@@ -87,28 +106,29 @@ def eval_detection(
     #     print("  ap = {:.2%}".format(ap))
 
     if outsys_dir is not None:
-        write_text(sentence="{} detection:".format("labeled only" if labeled_only else "all"), fpath=os.path.join(outsys_dir, 'os.txt'))
+        write_text(sentence="{} detection:".format("labeled only" if labeled_only else "all"),
+                   fpath=os.path.join(outsys_dir, 'os.txt'))
         write_text(sentence="  recall = {:.2%}".format(det_rate), fpath=os.path.join(outsys_dir, 'os.txt'))
         if not labeled_only:
             write_text(sentence="  ap = {:.2%}".format(ap), fpath=os.path.join(outsys_dir, 'os.txt'))
-        
+
     return det_rate, ap
 
 
 def eval_search_cuhk(
-    gallery_dataset,
-    query_dataset,
-    gallery_dets,
-    gallery_feats,
-    query_box_feats,
-    query_dets,
-    query_feats,
-    k1=10,
-    k2=3,
-    det_thresh=0.5,
-    cbgm=False,
-    gallery_size=100,
-    outsys_dir=None
+        gallery_dataset,
+        query_dataset,
+        gallery_dets,
+        gallery_feats,
+        query_box_feats,
+        query_dets,
+        query_feats,
+        k1=10,
+        k2=3,
+        det_thresh=0.5,
+        cbgm=False,
+        gallery_size=100,
+        outsys_dir=None
 ):
     """
     gallery_dataset/query_dataset: an instance of BaseDataset
@@ -221,8 +241,8 @@ def eval_search_cuhk(
                 qboxes = query_dets[i][:k2]
                 qfeats = query_feats[i][:k2]
                 assert (
-                    query_roi - qboxes[0][:4]
-                ).sum() <= 0.001, "query_roi must be the first one in pboxes"
+                               query_roi - qboxes[0][:4]
+                       ).sum() <= 0.001, "query_roi must be the first one in pboxes"
 
                 # build the bipartite graph and run Kuhn-Munkres (K-M) algorithm
                 # to find the best match
@@ -316,19 +336,19 @@ def eval_search_cuhk(
 
 
 def eval_search_prw(
-    gallery_dataset,
-    query_dataset,
-    gallery_dets,
-    gallery_feats,
-    query_box_feats,
-    query_dets,
-    query_feats,
-    k1=30,
-    k2=4,
-    det_thresh=0.5,
-    cbgm=False,
-    ignore_cam_id=True,
-    outsys_dir=None
+        gallery_dataset,
+        query_dataset,
+        gallery_dets,
+        gallery_feats,
+        query_box_feats,
+        query_dets,
+        query_feats,
+        k1=30,
+        k2=4,
+        det_thresh=0.5,
+        cbgm=False,
+        ignore_cam_id=True,
+        outsys_dir=None
 ):
     """
     gallery_det (list of ndarray): n_det x [x1, x2, y1, y2, score] per image
@@ -342,7 +362,7 @@ def eval_search_prw(
     assert len(gallery_dataset) == len(gallery_dets)
     assert len(gallery_dataset) == len(gallery_feats)
     assert len(query_dataset) == len(query_box_feats)
-    
+
     annos = gallery_dataset.annotations
     name_to_det_feat = {}
     for anno, det, feat in zip(annos, gallery_dets, gallery_feats):
@@ -424,8 +444,8 @@ def eval_search_prw(
                 qboxes = query_dets[i][:k2]
                 qfeats = query_feats[i][:k2]
                 assert (
-                    query_roi - qboxes[0][:4]
-                ).sum() <= 0.001, "query_roi must be the first one in pboxes"
+                               query_roi - qboxes[0][:4]
+                       ).sum() <= 0.001, "query_roi must be the first one in pboxes"
 
                 graph = []
                 for indx_i, pfeat in enumerate(qfeats):
