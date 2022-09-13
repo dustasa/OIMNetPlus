@@ -1,0 +1,7 @@
+[2022/09/13 19:59:12]: Creating model
+[2022/09/13 19:59:28]: Creating model
+[2022/09/13 19:59:31]: Loading data
+[2022/09/13 19:59:32]: Creating output folder
+[2022/09/13 19:59:32]: Full config is saved to ./exps/prw_oim_seg_1/config.yaml
+[2022/09/13 19:59:32]: Epoch: [0]
+[2022/09/13 19:59:35]: Epoch: [0]  [  0/312]  eta: 0:18:40  lr: 0.000013  loss: 11.4613 (11.4613)  loss_proposal_cls: 1.5131 (1.5131)  loss_proposal_reg: 1.0156 (1.0156)  loss_box_reid: 6.8896 (6.8896)  loss_rpn_reg: 1.3511 (1.3511)  loss_rpn_cls: 0.6920 (0.6920)  time: 3.5918  data: 1.6000  max mem: 6.70GB

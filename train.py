@@ -124,15 +124,18 @@ def main(args):
             write_text(sentence=' ', fpath=osp.join(output_dir, 'os.txt'))
 
             if tfboard:
-                n_iter = (epoch+1) * len(train_loader)
-                
-                tfboard.add_scalar("test/mAP", ret['mAP'], n_iter)
-                tfboard.add_scalar("test/r1", ret['accs'][0], n_iter)
-                tfboard.add_scalar("test/r10", ret['accs'][2], n_iter)
+                n_iter = (epoch + 1) * len(train_loader)
+                # change n_iter to epoch
+                tfboard.add_scalar("test/mAP", ret['mAP'], epoch)
+                tfboard.add_scalar("test/r1", ret['accs'][0], epoch)
+                tfboard.add_scalar("test/r5", ret['accs'][1], epoch)
+                tfboard.add_scalar("test/r10", ret['accs'][2], epoch)
 
-                tfboard.add_scalar("test_gt/mAP", ret_gt['mAP'], n_iter)
-                tfboard.add_scalar("test_gt/r1", ret_gt['accs'][0], n_iter)
-                tfboard.add_scalar("test_gt/r10", ret_gt['accs'][2], n_iter)
+                if epoch == cfg.SOLVER.MAX_EPOCHS - 1:
+                    tfboard.add_scalar("test_gt/mAP", ret_gt['mAP'], epoch)
+                    tfboard.add_scalar("test_gt/r1", ret_gt['accs'][0], epoch)
+                    tfboard.add_scalar("test_gt/r5", ret_gt['accs'][1], epoch)
+                    tfboard.add_scalar("test_gt/r10", ret_gt['accs'][2], epoch)
 
         if (epoch + 1) % cfg.CKPT_PERIOD == 0 or epoch == cfg.SOLVER.MAX_EPOCHS - 1:
             ckpt_dir = osp.join(output_dir, 'checkpoints')

@@ -63,8 +63,8 @@ class OIMLoss(nn.Module):
         projected *= self.oim_scalar
 
         self.header_cq = (
-            self.header_cq + (label >= self.num_pids).long().sum().item()
-        ) % self.num_unlabeled
+                                 self.header_cq + (label >= self.num_pids).long().sum().item()
+                         ) % self.num_unlabeled
         loss_oim = F.cross_entropy(projected, label, ignore_index=5554)
         return loss_oim
 
@@ -127,11 +127,10 @@ class LOIMLoss(nn.Module):
         ious = ious[inds]
         inputs = inputs[inds.unsqueeze(1).expand_as(inputs)].view(-1, self.num_features)
 
-        projected = loim(inputs, label, self.lut, self.cq, self.header_cq, momentum=self.momentum, ious=ious, eps=self.oim_eps)
+        projected = loim(inputs, label, self.lut, self.cq, self.header_cq, momentum=self.momentum, ious=ious,
+                         eps=self.oim_eps)
         projected *= self.oim_scalar
 
-        self.header_cq = (
-            self.header_cq + (label >= self.num_pids).long().sum().item()
-        ) % self.num_unlabeled
+        self.header_cq = (self.header_cq + (label >= self.num_pids).long().sum().item()) % self.num_unlabeled
         loss_oim = F.cross_entropy(projected, label, ignore_index=5554)
         return loss_oim

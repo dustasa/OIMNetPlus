@@ -12,6 +12,7 @@ from torchvision.ops import MultiScaleRoIAlign
 from torchvision.ops import boxes as box_ops
 
 from losses.oim import OIMLoss, LOIMLoss
+from losses.iou import box_iou, generalized_box_iou, ma_box_iou_t2b
 from models.backbone.resnet import build_resnet
 from models.custom_modules import PrototypeNorm1d, register_targets_for_pn, convert_bn_to_pn
 
@@ -160,18 +161,18 @@ class BaseNet(nn.Module):
 
 class BaseRoIHeads(RoIHeads):
     def __init__(
-        self,
-        num_pids,
-        num_cq_size,
-        oim_momentum,
-        oim_scalar,
-        oim_type,
-        oim_eps, 
-        faster_rcnn_predictor,
-        reid_head,
-        norm_type,
-        *args,
-        **kwargs
+            self,
+            num_pids,
+            num_cq_size,
+            oim_momentum,
+            oim_scalar,
+            oim_type,
+            oim_eps,
+            faster_rcnn_predictor,
+            reid_head,
+            norm_type,
+            *args,
+            **kwargs
     ):
         super(BaseRoIHeads, self).__init__(*args, **kwargs)
         self.embedding_head = ReIDEmbedding(
@@ -206,10 +207,16 @@ class BaseRoIHeads(RoIHeads):
                 self.select_training_samples(proposals, targets)
 
         roi_pooled_features = self.box_roi_pool(features, proposals, image_shapes)
-        if self.training: register_targets_for_pn(self.reid_head, torch.cat(labels).long())
+
+        if self.training:
+            register_targets_for_pn(self.reid_head, torch.cat(labels).long())
+
         rcnn_features = self.reid_head(roi_pooled_features)
         class_logits, box_regression = self.box_predictor(rcnn_features['feat_res5'])
-        if self.training: register_targets_for_pn(self.embedding_head, torch.cat(labels).long())
+
+        if self.training:
+            register_targets_for_pn(self.embedding_head, torch.cat(labels).long())
+
         embeddings_ = self.embedding_head(rcnn_features)
 
         result, losses = [], {}

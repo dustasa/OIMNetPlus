@@ -6,8 +6,8 @@ from defaults import get_default_cfg
 
 
 def print_debug(*args, **kwargs):
-    flag = True
-    # flag = False
+    # flag = True
+    flag = False
     if flag:
         print(*args, **kwargs)
     else:

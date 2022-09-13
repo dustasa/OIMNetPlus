@@ -158,14 +158,14 @@ class MetricLogger(object):
                 eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
                 if torch.cuda.is_available():
                     write_text(log_msg.format(
-                            i,
-                            len(iterable),
-                            eta=eta_string,
-                            meters=str(self),
-                            time=str(iter_time),
-                            data=str(data_time),
-                            memory=torch.cuda.max_memory_allocated() / GB,
-                        ), self.txt_dir)
+                        i,
+                        len(iterable),
+                        eta=eta_string,
+                        meters=str(self),
+                        time=str(iter_time),
+                        data=str(data_time),
+                        memory=torch.cuda.max_memory_allocated() / GB,
+                    ), self.txt_dir)
                 else:
                     print(
                         log_msg.format(
@@ -178,14 +178,14 @@ class MetricLogger(object):
                         )
                     )
                     write_text(log_msg.format(
-                            i,
-                            len(iterable),
-                            eta=eta_string,
-                            meters=str(self),
-                            time=str(iter_time),
-                            data=str(data_time),
-                            memory=torch.cuda.max_memory_allocated() / GB,
-                        ), self.txt_dir)
+                        i,
+                        len(iterable),
+                        eta=eta_string,
+                        meters=str(self),
+                        time=str(iter_time),
+                        data=str(data_time),
+                        memory=torch.cuda.max_memory_allocated() / GB,
+                    ), self.txt_dir)
             i += 1
             end = time.time()
         total_time = time.time() - start_time

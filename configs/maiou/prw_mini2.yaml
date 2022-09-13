@@ -1,7 +1,7 @@
-OUTPUT_DIR: "./exps/prw_oim++"
+OUTPUT_DIR: "./exps/maiou/prw_oim++_mini_3"
 INPUT:
   DATASET: "PRW"
-  DATA_ROOT: "./datasets/PRW"
+  DATA_ROOT: "./datasets/PRW_MINI_2"
 MODEL:
   LOSS:
     TYPE: 'LOIM'
