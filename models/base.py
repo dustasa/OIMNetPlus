@@ -16,6 +16,7 @@ from losses.iou import box_iou, generalized_box_iou, ma_box_iou_t2b
 from models.backbone.resnet import build_resnet
 from models.custom_modules import PrototypeNorm1d, register_targets_for_pn, convert_bn_to_pn
 
+
 class BaseNet(nn.Module):
     def __init__(self, cfg):
         super(BaseNet, self).__init__()
@@ -57,7 +58,7 @@ class BaseNet(nn.Module):
             featmap_names=["feat_res4"], output_size=14, sampling_ratio=2
         )
         box_predictor = BBoxPredictor(2048, num_classes=2, bn_neck=cfg.MODEL.ROI_HEAD.BN_NECK)
-        
+
         roi_heads = BaseRoIHeads(
             # OIM
             num_pids=cfg.MODEL.LOSS.LUT_SIZE,
@@ -65,7 +66,7 @@ class BaseNet(nn.Module):
             oim_momentum=cfg.MODEL.LOSS.OIM_MOMENTUM,
             oim_scalar=cfg.MODEL.LOSS.OIM_SCALAR,
             oim_type=cfg.MODEL.LOSS.TYPE,
-            oim_eps=cfg.MODEL.LOSS.OIM_EPS, 
+            oim_eps=cfg.MODEL.LOSS.OIM_EPS,
             faster_rcnn_predictor=faster_rcnn_predictor,
             reid_head=reid_head,
             norm_type=cfg.MODEL.ROI_HEAD.NORM_TYPE,
@@ -141,7 +142,7 @@ class BaseNet(nn.Module):
         features = self.backbone(images.tensors)
         proposals, proposal_losses = self.rpn(images, features, targets)
         _, detector_losses = self.roi_heads(features, proposals, images.image_sizes, targets)
-        
+
         # rename rpn losses to be consistent with detection losses
         proposal_losses["loss_rpn_reg"] = proposal_losses.pop("loss_rpn_box_reg")
         proposal_losses["loss_rpn_cls"] = proposal_losses.pop("loss_objectness")
@@ -183,7 +184,7 @@ class BaseRoIHeads(RoIHeads):
         )
         if oim_type == 'OIM':
             self.reid_loss = OIMLoss(256, num_pids, num_cq_size, oim_momentum, oim_scalar)
-        if oim_type == 'LOIM': 
+        if oim_type == 'LOIM':
             self.reid_loss = LOIMLoss(256, num_pids, num_cq_size, oim_momentum, oim_scalar, oim_eps)
         self.oim_type = oim_type
         self.faster_rcnn_predictor = faster_rcnn_predictor
@@ -229,20 +230,20 @@ class BaseRoIHeads(RoIHeads):
                 for batch_index in range(len(proposals)):
                     box_p = proposals[batch_index]
                     box_t = targets[batch_index]['boxes']
-                    ious = box_ops.box_iou(box_p, box_t) 
-                    ious_max = torch.max(ious, dim=1)[0] 
+                    ious = box_ops.box_iou(box_p, box_t)
+                    ious_max = torch.max(ious, dim=1)[0]
                     max_iou_list.append(ious_max)
                 ious = torch.cat(max_iou_list, dim=0)
 
             det_labels = [y.clamp(0, 1) for y in labels]
             loss_proposal_cls, loss_proposal_reg = \
                 rcnn_loss(class_logits, box_regression,
-                                     det_labels, regression_targets)
+                          det_labels, regression_targets)
 
             if self.oim_type == 'LOIM':
-                ious = torch.clamp(ious, min=0.7) # min = cfg.MODEL.RPN.POS_THRESH_TRAIN (just to be safe)
+                ious = torch.clamp(ious, min=0.7)  # min = cfg.MODEL.RPN.POS_THRESH_TRAIN (just to be safe)
                 loss_box_reid = self.reid_loss.forward(embeddings_, labels, ious)
-            else: 
+            else:
                 loss_box_reid = self.reid_loss.forward(embeddings_, labels)
 
             losses = dict(loss_proposal_cls=loss_proposal_cls,
@@ -251,11 +252,11 @@ class BaseRoIHeads(RoIHeads):
         else:
             gt_det = None
             if query_img_as_gallery:
-                gt_det = {"boxes": targets[0]["boxes"], "embeddings":embeddings_}
+                gt_det = {"boxes": targets[0]["boxes"], "embeddings": embeddings_}
 
             boxes, scores, embeddings, labels = \
                 self.postprocess_boxes(class_logits, box_regression, embeddings_,
-                                            proposals, image_shapes, gt_det=gt_det)
+                                       proposals, image_shapes, gt_det=gt_det)
             num_images = len(boxes)
             for i in range(num_images):
                 result.append(
@@ -287,15 +288,15 @@ class BaseRoIHeads(RoIHeads):
         return all_boxes
 
     def postprocess_boxes(
-        self,
-        class_logits,
-        box_regression,
-        embeddings,
-        proposals,
-        image_shapes,
-        fcs=None,
-        gt_det=None,
-        cws=False,
+            self,
+            class_logits,
+            box_regression,
+            embeddings,
+            proposals,
+            image_shapes,
+            fcs=None,
+            gt_det=None,
+            cws=False,
     ):
         """
         class_logits: 2D tensor(n_roi_per_img*bs C)
@@ -372,7 +373,8 @@ class BaseRoIHeads(RoIHeads):
             if embeddings is not None:
                 all_embeddings.append(embeddings)
             n_iter += 1
-        return all_boxes, all_scores, all_embeddings, all_labels 
+        return all_boxes, all_scores, all_embeddings, all_labels
+
 
 class ReIDEmbedding(nn.Module):
 
@@ -390,14 +392,14 @@ class ReIDEmbedding(nn.Module):
             indv_dim = int(indv_dim)
             if norm_type == 'none':
                 proj = nn.Sequential(
-                    nn.Linear(in_channel, indv_dim, bias=False), 
+                    nn.Linear(in_channel, indv_dim, bias=False),
                 )
 
                 init.normal_(proj[0].weight, std=0.01)
 
             if norm_type == 'protonorm':
                 proj = nn.Sequential(
-                    nn.Linear(in_channel, indv_dim, bias=False), 
+                    nn.Linear(in_channel, indv_dim, bias=False),
                     PrototypeNorm1d(indv_dim)
                 )
 
@@ -440,6 +442,7 @@ class ReIDEmbedding(nn.Module):
             assert sum(tmp) == self.dim
             return tmp
 
+
 class BBoxPredictor(nn.Module):
     def __init__(self, in_channels, num_classes, bn_neck=True):
         super(BBoxPredictor, self).__init__()
@@ -464,8 +467,8 @@ class BBoxPredictor(nn.Module):
         bbox_deltas = self.bbox_pred(x)
         return bbox_scores, bbox_deltas
 
-def rcnn_loss(class_logits, box_regression, labels, regression_targets):
 
+def rcnn_loss(class_logits, box_regression, labels, regression_targets):
     labels = torch.cat(labels, dim=0)
     regression_targets = torch.cat(regression_targets, dim=0)
     classification_loss = F.cross_entropy(class_logits, labels)

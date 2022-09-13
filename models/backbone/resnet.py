@@ -5,6 +5,7 @@ import torchvision
 from torch import nn
 from models.backbone.resnet_utils import resnet50
 
+
 class Backbone(nn.Sequential):
     def __init__(self, resnet):
         super(Backbone, self).__init__(
@@ -27,6 +28,7 @@ class Backbone(nn.Sequential):
         feat = super(Backbone, self).forward(x)
         return OrderedDict([["feat_res4", feat]])
 
+
 class Res5Head(nn.Sequential):
     def __init__(self, resnet):
         super(Res5Head, self).__init__(OrderedDict([["layer4", resnet.layer4]]))  # res5
@@ -34,10 +36,10 @@ class Res5Head(nn.Sequential):
 
     def forward(self, x):
         feat = super(Res5Head, self).forward(x)
-        
+
         x = F.adaptive_max_pool2d(x, 1)
         feat = F.adaptive_max_pool2d(feat, 1)
-        
+
         return OrderedDict([["feat_res4", x], ["feat_res5", feat]])
 
 
@@ -51,4 +53,3 @@ def build_resnet(name="resnet50", pretrained=True):
     resnet.bn1.bias.requires_grad_(False)
 
     return Backbone(resnet), Res5Head(resnet)
-    
