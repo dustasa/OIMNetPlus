@@ -11,8 +11,9 @@ class BaseDataset:
         self.root = root
         self.transforms = transforms
         self.split = split
-        assert self.split in ("train", "gallery", "query")
+        assert self.split in ("train", "gallery", "query", "val")
         self.annotations = self._load_annotations()
+
 
     def _load_annotations(self):
         """
@@ -23,6 +24,15 @@ class BaseDataset:
             pids (np.array[N]): person IDs corresponding to these boxes
             cam_id (int): camera ID (only for PRW dataset)
         """
+        raise NotImplementedError
+
+
+    def get_height_and_width(self, idx):
+        """方便统计所有图片的高宽比例信息"""
+        raise NotImplementedError
+
+    def get_annotations(self, idx):
+        """方便构建COCO()"""
         raise NotImplementedError
 
     def __getitem__(self, index):

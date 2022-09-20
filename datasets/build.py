@@ -3,8 +3,11 @@ import torch
 from utils.transforms import build_transforms
 from utils.utils import create_small_table
 
-from .cuhk_sysu import CUHKSYSU
-from .prw import PRW
+from datasets.cuhk_sysu import CUHKSYSU
+from datasets.prw import PRW
+from datasets.my_dataset_prwvoc import PRW_VOCInstances
+from datasets.prw_voc import PRW_VOC
+from defaults import get_default_cfg
 
 
 def print_statistics(dataset):
@@ -55,10 +58,14 @@ def build_dataset(dataset_name, root, transforms, split, verbose=True):
         dataset = CUHKSYSU(root, transforms, split)
     elif dataset_name == "PRW":
         dataset = PRW(root, transforms, split)
+    elif dataset_name == "PRW_VOC":
+        dataset = PRW_VOC(root, transforms, split)
     else:
         raise NotImplementedError(f"Unknow dataset: {dataset_name}")
     if verbose:
         print_statistics(dataset)
+    d1 = dataset[0]
+    print(f'build dataset [67]: {d1}')
     return dataset
 
 
@@ -69,6 +76,8 @@ def collate_fn(batch):
 def build_train_loader(cfg):
     transforms = build_transforms(is_train=True)
     dataset = build_dataset(cfg.INPUT.DATASET, cfg.INPUT.DATA_ROOT, transforms, "train")
+    d1 = dataset[0]
+    print(f'build_train_loader [79]: {d1}')
     return torch.utils.data.DataLoader(
         dataset,
         batch_size=cfg.INPUT.BATCH_SIZE_TRAIN,
@@ -83,7 +92,11 @@ def build_train_loader(cfg):
 def build_test_loader(cfg):
     transforms = build_transforms(is_train=False)
     gallery_set = build_dataset(cfg.INPUT.DATASET, cfg.INPUT.DATA_ROOT, transforms, "gallery")
+    d1 = gallery_set[0]
+    print(f'gallery_set [95]: {d1}')
     query_set = build_dataset(cfg.INPUT.DATASET, cfg.INPUT.DATA_ROOT, transforms, "query")
+    d2 = query_set[0]
+    print(f'query_set [98]: {d2}')
     gallery_loader = torch.utils.data.DataLoader(
         gallery_set,
         batch_size=cfg.INPUT.BATCH_SIZE_TEST,
@@ -101,3 +114,18 @@ def build_test_loader(cfg):
         collate_fn=collate_fn,
     )
     return gallery_loader, query_loader
+
+
+def main(cfg):
+    train_loader = build_train_loader(cfg)
+    print(len(train_loader))
+    # train1 = train_loader[0]
+    # print(train1)
+    gallery_loader, query_loader = build_test_loader(cfg)
+    print(len(gallery_loader))
+    print(len(query_loader))
+
+
+if __name__ == '__main__':
+    cfg = get_default_cfg()
+    main(cfg)

@@ -2,7 +2,6 @@ import os.path as osp
 
 import numpy as np
 from scipy.io import loadmat
-
 from .base import BaseDataset
 
 

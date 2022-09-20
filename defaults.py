@@ -6,8 +6,8 @@ _C = CN()
 #                           Input                          #
 # -------------------------------------------------------- #
 _C.INPUT = CN()
-_C.INPUT.DATASET = "CUHK-SYSU"
-_C.INPUT.DATA_ROOT = "/workspace/dataset/CUHK-SYSU"
+_C.INPUT.DATASET = "PRW_VOC"
+_C.INPUT.DATA_ROOT = "/home/aousn/git-repo/OIMNetPlus_new/OIMNetPlus/datasets/PRW_SEG_VOC_MIX"
 
 # Size of the smallest side of the image
 _C.INPUT.MIN_SIZE = 900
@@ -128,7 +128,7 @@ _C.MODEL.LOSS.OIM_EPS = 0.1
 #                        Evaluation                        #
 # -------------------------------------------------------- #
 # The period to evaluate the model during training
-_C.EVAL_PERIOD = 5
+_C.EVAL_PERIOD = 20
 # Evaluation with GT boxes to verify the upper bound of person search performance
 _C.EVAL_USE_GT = False
 # Fast evaluation with cached features

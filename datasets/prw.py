@@ -3,8 +3,7 @@ import re
 
 import numpy as np
 from scipy.io import loadmat
-
-from .base import BaseDataset
+from datasets.base import BaseDataset
 
 
 class PRW(BaseDataset):

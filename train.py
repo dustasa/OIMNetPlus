@@ -17,6 +17,7 @@ from models.base import BaseNet
 from utils.utils import mkdir, resume_from_ckpt, save_on_master, set_random_seed
 from utils.utils import write_text
 
+
 def main(args):
     cfg = get_default_cfg()
     if args.cfg_file:

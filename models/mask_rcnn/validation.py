@@ -205,7 +205,7 @@ if __name__ == "__main__":
     parser.add_argument('--num-classes', type=int, default=1, help='number of classes')
 
     # 数据集的根目录
-    parser.add_argument('--data-path', default='/home/aousn/git-repo/person_search/person_search/data/PRW_VOC', help='dataset root')
+    parser.add_argument('--data-path', default='/home/aousn/git-repo/OIMNetPlus_new/OIMNetPlus/datasets/PRW_SEG_VOC_MIX', help='dataset root')
 
     # 训练好的权重文件
     parser.add_argument('--weights-path', default='./save_weights/model_9.pth', type=str, help='training weights')

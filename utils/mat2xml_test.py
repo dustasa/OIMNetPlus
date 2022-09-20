@@ -120,7 +120,7 @@ def prettify(elem):
     return reparsed.toprettyxml(indent="\t")
 
 
-# 我这里需要resize下图片，不需要的可以不用。
+# resize图片，按需
 def resize(img_list):
     for i in img_list:
         imgname = glob.glob(os.path.join(img_input, i))
